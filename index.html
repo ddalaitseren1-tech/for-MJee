@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>A Special Letter for You</title>
+    <title>Message for You</title>
     <style>
         :root {
             --env-color: #f4d03f;
@@ -20,6 +20,7 @@
             margin: 0;
             cursor: pointer;
             font-family: sans-serif;
+            overflow: hidden;
         }
 
         .envelope-wrapper {
@@ -27,10 +28,11 @@
             width: 300px;
             height: 200px;
             background-color: var(--env-dark);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            perspective: 1000px; /* Needed for the 3D flip */
         }
 
-        /* The Flap */
+        /* Envelope Flap */
         .flap {
             position: absolute;
             top: 0;
@@ -41,79 +43,103 @@
             border-top: 100px solid var(--env-color);
             transform-origin: top;
             transition: transform 0.4s ease;
-            z-index: 3;
+            z-index: 4;
         }
 
-        /* The Envelope Body */
+        /* Envelope Body */
         .envelope-wrapper::after {
             content: "";
             position: absolute;
             bottom: 0;
-            width: 0;
-            height: 0;
+            width: 0; height: 0;
             border-left: 150px solid transparent;
             border-right: 150px solid transparent;
             border-bottom: 100px solid var(--env-color);
-            z-index: 2;
+            z-index: 3;
         }
 
         .envelope-wrapper::before {
             content: "";
             position: absolute;
             top: 0;
-            width: 0;
-            height: 0;
+            width: 0; height: 0;
             border-left: 150px solid var(--env-color);
             border-top: 100px solid transparent;
             border-bottom: 100px solid transparent;
-            z-index: 2;
+            z-index: 3;
         }
 
         .right-side {
             position: absolute;
-            top: 0;
-            right: 0;
-            width: 0;
-            height: 0;
+            top: 0; right: 0;
+            width: 0; height: 0;
             border-right: 150px solid var(--env-color);
             border-top: 100px solid transparent;
             border-bottom: 100px solid transparent;
-            z-index: 2;
+            z-index: 3;
         }
 
-        /* The Letter / Finger */
+        /* The Paper / Letter */
         .letter {
             position: absolute;
             bottom: 10px;
             left: 10%;
             width: 80%;
             height: 80%;
+            transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 2;
+            transform-style: preserve-3d; /* Allows the flip */
+        }
+
+        /* Front and Back of the paper */
+        .letter-front, .letter-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
             background: var(--letter-color);
+            backface-visibility: hidden;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
-            transition: transform 0.5s ease;
-            z-index: 1;
-            font-size: 80px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            border-radius: 5px;
+            padding: 10px;
+            box-sizing: border-box;
+            text-align: center;
         }
+
+        .letter-back {
+            transform: rotateY(180deg);
+            background: #fffafa;
+        }
+
+        .emoji { font-size: 50px; margin: 0; }
+        .text { font-size: 16px; font-weight: bold; color: #333; margin-top: 5px; }
 
         /* Animation States */
         .open .flap {
             transform: rotateX(180deg);
-            z-index: 0;
+            z-index: 1;
         }
 
         .open .letter {
-            transform: translateY(-120px);
+            transform: translateY(-140px);
+        }
+
+        /* The Flip State */
+        .flipped .letter {
+            transform: translateY(-140px) rotateY(180deg);
         }
 
         .instruction {
             position: absolute;
-            bottom: -50px;
+            bottom: -60px;
             width: 100%;
             text-align: center;
             color: white;
-            font-weight: bold;
+            font-size: 14px;
+            text-transform: uppercase;
         }
     </style>
 </head>
@@ -122,18 +148,26 @@
     <div class="envelope-wrapper" id="envelope">
         <div class="flap"></div>
         <div class="right-side"></div>
+        
         <div class="letter">
-            🖕
+            <div class="letter-front">
+                <p class="emoji">🖕</p>
+                <p class="text">Oo anduuchij!</p>
+            </div>
+            <div class="letter-back">
+                <p class="emoji">🥺</p>
+                <p class="text">Uujlaareee...</p>
+            </div>
         </div>
-        <div class="instruction">CLICK TO OPEN</div>
+
+        <div id="instruction" class="instruction">Click to Open</div>
     </div>
 
     <script>
         const envelope = document.getElementById('envelope');
-        envelope.addEventListener('click', () => {
-            envelope.classList.toggle('open');
-        });
-    </script>
+        const instruction = document.getElementById('instruction');
+        let step = 0;
 
-</body>
-</html>
+        envelope.addEventListener('click', () => {
+            if (step === 0) {
+                //
